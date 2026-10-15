@@ -1,0 +1,9 @@
+Task,Status,Priority,Notes
+Repository and planning documents,Completed,High,Only if actually completed
+User login,To Do,High,Update after work begins
+Add student,To Do,High,Update after work begins
+Search student,To Do,High,Update after work begins
+Record attendance,To Do,High,Depends on student and course records
+Add course,Backlog,Medium,Not selected for current Sprint
+Generate reports,Backlog,Medium,Depends on stored data
+Notifications,Backlog,Low,Later iteration
