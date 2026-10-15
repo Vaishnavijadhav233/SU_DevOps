@@ -1,0 +1,17 @@
+---
+- name: Install Docker engine and the Python Docker SDK (needed by Ansible modules)
+  ansible.builtin.apt:
+    name: [docker.io, python3-docker]
+    state: present
+
+- name: Enable and start the Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add the ubuntu user to the docker group
+  ansible.builtin.user:
+    name: ubuntu
+    groups: docker
+    append: true

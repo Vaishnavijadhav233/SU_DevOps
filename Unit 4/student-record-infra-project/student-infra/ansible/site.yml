@@ -1,0 +1,16 @@
+---
+- name: Configure Student Record Platform server
+  hosts: student_servers
+  become: true
+
+  pre_tasks:
+    - name: Wait until the new EC2 instance accepts SSH
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 180
+
+  roles:
+    - common
+    - docker
+    - nginx
+    - student_app

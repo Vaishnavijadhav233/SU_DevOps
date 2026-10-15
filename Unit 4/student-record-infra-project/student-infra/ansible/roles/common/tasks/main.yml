@@ -1,0 +1,25 @@
+---
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base system utilities
+  ansible.builtin.apt:
+    name: [curl, git, jq, unzip, ufw, ca-certificates]
+    state: present
+
+- name: Allow required ports through UFW (SSH first, so we never lock ourselves out)
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "22"
+    - "80"
+    - "{{ app_port }}"
+
+- name: Enable UFW with default deny for incoming traffic
+  community.general.ufw:
+    state: enabled
+    policy: deny

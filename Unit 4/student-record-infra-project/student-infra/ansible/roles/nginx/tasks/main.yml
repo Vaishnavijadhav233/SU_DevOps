@@ -1,0 +1,24 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Remove the default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Deploy reverse-proxy configuration (port 80 -> app port)
+  ansible.builtin.template:
+    src: student-app.conf.j2
+    dest: /etc/nginx/conf.d/student-app.conf
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable and start Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

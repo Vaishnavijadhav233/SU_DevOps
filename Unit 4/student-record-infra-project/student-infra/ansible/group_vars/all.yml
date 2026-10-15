@@ -1,0 +1,6 @@
+app_name: student-app
+app_port: 8080
+app_image_name: student-record-app
+app_image_tag: "1.0.0"
+app_src_dir: /opt/student-app
+app_data_dir: /opt/student-app/data

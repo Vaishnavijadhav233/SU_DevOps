@@ -1,0 +1,54 @@
+---
+- name: Copy application source to the server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../app/"
+    dest: "{{ app_src_dir }}/"
+    mode: preserve
+  register: app_code
+
+- name: Create persistent data directory (owned by the container user, uid 1000)
+  ansible.builtin.file:
+    path: "{{ app_data_dir }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0775"
+
+- name: Build the Docker image (only rebuilds when the code changed)
+  community.docker.docker_image:
+    name: "{{ app_image_name }}"
+    tag: "{{ app_image_tag }}"
+    source: build
+    build:
+      path: "{{ app_src_dir }}"
+    force_source: "{{ app_code.changed }}"
+  register: app_image
+
+- name: Run the application container
+  community.docker.docker_container:
+    name: "{{ app_name }}"
+    image: "{{ app_image_name }}:{{ app_image_tag }}"
+    state: started
+    restart_policy: always
+    recreate: "{{ app_image.changed }}"
+    published_ports:
+      - "{{ app_port }}:8080"
+    volumes:
+      - "{{ app_data_dir }}:/data"
+    env:
+      LOG_LEVEL: "{{ log_level | default('INFO') }}"
+
+- name: Wait for the application port
+  ansible.builtin.wait_for:
+    port: "{{ app_port }}"
+    timeout: 60
+
+- name: Verify the health endpoint through Nginx
+  ansible.builtin.uri:
+    url: http://localhost/api/health
+    return_content: true
+  register: health
+  until: health.status == 200
+  retries: 5
+  delay: 3
+  changed_when: false
