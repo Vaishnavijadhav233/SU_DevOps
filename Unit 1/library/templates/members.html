@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Members</h2>
+<form method="post" class="row">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <input name="name" placeholder="Name" required>
+  <input name="email" type="email" placeholder="Email" required>
+  <button>Add member</button>
+</form>
+<table>
+  <tr><th>ID</th><th>Name</th><th>Email</th><th>Books out</th><th></th></tr>
+  {% for m in members %}
+  <tr><td>{{ m.id }}</td><td>{{ m.name }}</td><td>{{ m.email }}</td><td>{{ m.active }}</td>
+    <td><form method="post" action="{{ url_for('delete_member', i=m.id) }}" onsubmit="return confirm('Delete member?')">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="danger">Delete</button></form></td></tr>
+  {% else %}<tr><td colspan="5">No members yet.</td></tr>{% endfor %}
+</table>
+{% endblock %}

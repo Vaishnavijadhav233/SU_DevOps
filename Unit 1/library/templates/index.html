@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get" class="row">
+  <input name="q" value="{{ q }}" placeholder="Search title, author, ISBN, category">
+  <select name="status">
+    <option value="">All</option>
+    <option value="available" {{ 'selected' if status == 'available' }}>Available</option>
+    <option value="issued" {{ 'selected' if status == 'issued' }}>Issued</option>
+  </select>
+  <button>Search</button>
+</form>
+
+<table>
+  <tr><th>ID</th><th>Title</th><th>Author</th><th>Category</th><th>Status</th>{% if session.admin %}<th>Actions</th>{% endif %}</tr>
+  {% for b in books %}
+  <tr>
+    <td>{{ b.id }}</td><td>{{ b.title }}</td><td>{{ b.author }}</td><td>{{ b.category }}</td>
+    <td>
+      {% if b.loan_id %}
+        <span class="badge {{ 'late' if b.loan_due < today else 'out' }}">Issued, due {{ b.loan_due }}</span>
+        {% if b.member and session.admin %}<small>to {{ b.member }}</small>{% endif %}
+      {% else %}<span class="badge in">Available</span>{% endif %}
+    </td>
+    {% if session.admin %}
+    <td class="actions">
+      {% if b.loan_id %}
+        <form method="post" action="{{ url_for('ret', i=b.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button>Return</button></form>
+        <form method="post" action="{{ url_for('renew', i=b.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button>Renew</button></form>
+      {% else %}
+        <form method="post" action="{{ url_for('issue', i=b.id) }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <select name="member_id" required><option value="">Member…</option>
+            {% for m in members %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select>
+          <button>Issue</button>
+        </form>
+        <form method="post" action="{{ url_for('delete_book', i=b.id) }}" onsubmit="return confirm('Delete this book?')">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="danger">Delete</button>
+        </form>
+      {% endif %}
+    </td>
+    {% endif %}
+  </tr>
+  {% else %}<tr><td colspan="6">No books found.</td></tr>{% endfor %}
+</table>
+<p class="muted">Loan period 14 days · Late fine Rs {{ fine_per_day }}/day</p>
+
+{% if session.admin %}
+<h3>Add a book</h3>
+<form method="post" action="{{ url_for('add_book') }}" class="row">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <input name="title" placeholder="Title" required>
+  <input name="author" placeholder="Author" required>
+  <input name="category" placeholder="Category">
+  <input name="isbn" placeholder="ISBN">
+  <button>Add</button>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="cards">
+  <div><b>{{ stats.books }}</b>Total books</div>
+  <div><b>{{ stats.available }}</b>Available</div>
+  <div><b>{{ stats.issued }}</b>Issued</div>
+  <div><b>{{ stats.members }}</b>Members</div>
+  <div><b>Rs {{ stats.fines }}</b>Fines collected</div>
+</div>
+
+<h3>Overdue books</h3>
+<table>
+  <tr><th>Title</th><th>Member</th><th>Due</th><th>Fine so far</th></tr>
+  {% for o in overdue %}<tr><td>{{ o.title }}</td><td>{{ o.member or '-' }}</td><td>{{ o.due }}</td><td>Rs {{ o.fine }}</td></tr>
+  {% else %}<tr><td colspan="4">Nothing overdue 🎉</td></tr>{% endfor %}
+</table>
+
+<h3>Recent activity</h3>
+<table>
+  <tr><th>Title</th><th>Member</th><th>Issued</th><th>Due</th><th>Returned</th><th>Fine</th></tr>
+  {% for h in history %}<tr><td>{{ h.title }}</td><td>{{ h.member or '-' }}</td><td>{{ h.issued }}</td><td>{{ h.due }}</td>
+    <td>{{ h.returned or '—' }}</td><td>Rs {{ h.fine or 0 }}</td></tr>
+  {% else %}<tr><td colspan="6">No activity yet.</td></tr>{% endfor %}
+</table>
+{% endblock %}
